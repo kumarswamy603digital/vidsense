@@ -12,6 +12,12 @@ const languageMap: Record<string, string> = {
   kn: "Kannada",
 };
 
+const commandPrompts: Record<string, string> = {
+  "/summary": "Provide a concise summary of the entire video in 3-4 paragraphs. Cover all the main topics discussed.",
+  "/deepdive": "Provide an in-depth, detailed analysis of the video content. Cover every major topic discussed with explanations, examples mentioned, and nuances. Be thorough and comprehensive.",
+  "/actionpoints": "Extract all actionable items, tasks, recommendations, and practical steps mentioned in the video. Format them as a numbered list with clear, specific actions the viewer can take.",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -31,7 +37,10 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Build conversation messages
+    // Check if it's a command
+    const cmd = question.trim().toLowerCase();
+    const userContent = commandPrompts[cmd] || question;
+
     const messages = [
       {
         role: "system",
@@ -42,12 +51,15 @@ ${transcript.slice(0, 25000)}
 
 Rules:
 - Only answer based on the transcript content
-- If the question is not covered in the video, say so politely
+- If the question is not covered in the video, politely say: "This topic is not covered in the video."
 - Keep answers concise and helpful
-- Always respond in ${lang}`,
+- Always respond in ${lang}
+- Use markdown formatting for readability
+- For action points, use numbered lists
+- For deep dives, use headers and sections`,
       },
       ...history.map((h: any) => ({ role: h.role, content: h.content })),
-      { role: "user", content: question },
+      { role: "user", content: userContent },
     ];
 
     const response = await fetch(
