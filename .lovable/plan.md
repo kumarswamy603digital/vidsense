@@ -1,5 +1,5 @@
 
-# YouTube Video Summarizer & Q&A Web App
+  # YouTube Video Summarizer & Q&A Web App
 
 ## Overview
 A web application where users paste a YouTube video link, receive a structured AI-generated summary, and can ask follow-up questions about the video — all powered by AI with support for English, Hindi, and Kannada.
