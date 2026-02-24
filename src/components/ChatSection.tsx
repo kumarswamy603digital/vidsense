@@ -73,8 +73,26 @@ export function ChatSection({ transcript, language }: ChatSectionProps) {
 
       <ScrollArea className="h-[400px] p-4">
         {messages.length === 0 && (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-            Ask any question about the video content...
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <p className="text-muted-foreground text-sm">
+              Ask any question about the video, or try a quick command:
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {[
+                { cmd: "/summary", label: "📝 Summary", desc: "Get a concise summary" },
+                { cmd: "/deepdive", label: "🔍 Deep Dive", desc: "Detailed analysis" },
+                { cmd: "/actionpoints", label: "✅ Action Points", desc: "Extract tasks" },
+              ].map((c) => (
+                <button
+                  key={c.cmd}
+                  onClick={() => { setInput(c.cmd); }}
+                  className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-border bg-card hover:bg-accent transition-colors text-sm"
+                >
+                  <span className="font-medium text-foreground">{c.label}</span>
+                  <span className="text-xs text-muted-foreground">{c.desc}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
         <div className="space-y-4">
