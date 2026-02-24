@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { VideoSummary } from "@/components/VideoSummary";
 import { ChatSection } from "@/components/ChatSection";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Youtube, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
+import vidsenseLogo from "@/assets/vidsense-logo.png";
 
 interface SummaryData {
   title: string;
@@ -83,9 +84,7 @@ const Index = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="gradient-bg p-2 rounded-lg">
-            <Youtube className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src={vidsenseLogo} alt="VidSense" className="h-10 w-10 rounded-lg" />
           <div>
             <h1 className="text-xl font-bold text-foreground">VidSense</h1>
             <p className="text-xs text-muted-foreground">AI Research Assistant for YouTube</p>
