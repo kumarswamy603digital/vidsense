@@ -1,223 +1,305 @@
-# 🎬 VidSense
+# YouTube Content Summarizer Bot
 
-> **AI-powered YouTube video summarizer & interactive chat assistant**
+A fast, efficient Telegram bot that provides AI-powered summaries of YouTube videos using Google's Gemma 3 27B model. The bot fetches video transcripts and generates comprehensive summaries, with support for follow-up Q&A.
 
-VidSense lets you paste any YouTube URL and instantly get a structured AI-generated summary — then chat with the video's content in real-time using natural language. Supports multilingual output and streaming responses.
+## Features
 
----
+- 🎥 **Video Summarization**: Get comprehensive summaries of YouTube videos with metadata
+- 🤖 **AI-Powered**: Uses Google Gemma 3 27B for high-quality summaries
+- 💬 **Interactive Q&A**: Ask follow-up questions about video content with context awareness
+- 🔗 **Auto Link Summaries**: Automatically summarizes YouTube links in group chats
+- ⚡ **Fast Processing**: Async architecture with concurrent request handling
+- 📊 **Rich Metadata**: Extracts video title, duration, uploader, view count, and more
+- 📈 **Smart Caching**: Video context caching with comprehensive metadata storage
+- 🔒 **Security**: Input sanitization and content safety filters
+- 🚀 **Production Ready**: Docker deployment with health checks and resource management
 
-## ✨ Features
-
-- 📋 **Instant Summaries** — Paste a YouTube URL and receive a clean, structured breakdown of the video content
-- 💬 **Interactive Chat** — Ask questions grounded in the video transcript with full conversation history
-- ⚡ **Slash Commands** — Use `/summary`, `/deepdive`, and `/actionpoints` for quick insights
-- 🌐 **Multilingual Support** — Summarize and chat in English, Hindi, and Kannada
-- 📡 **Streaming Responses** — Real-time AI replies via Server-Sent Events (SSE)
-- 📱 **Fully Responsive** — Works seamlessly on mobile and desktop
-- 🌙 **Dark Theme UI** — Professional dark UI with gradient accents and blur effects
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 18, TypeScript, Vite |
-| **Styling** | Tailwind CSS, shadcn/ui |
-| **Routing** | React Router v6 |
-| **State Management** | TanStack React Query |
-| **Backend** | Supabase Edge Functions (Deno) |
-| **AI Model** | Google Gemini Flash (via AI Gateway) |
-| **Database / Auth** | Supabase |
-
----
-
-## 📁 Project Structure
+## Architecture
 
 ```
-vidsense/
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   │   ├── ui/               # shadcn/ui base components
-│   │   ├── ChatSection.tsx   # Chat interface with slash command support
-│   │   ├── VideoSummary.tsx  # Structured summary display
-│   │   └── NavLink.tsx       # Navigation component
-│   └── ...
-├── supabase/
-│   └── functions/
-│       ├── summarize/        # Edge function: transcript + AI summarization
-│       └── chat/             # Edge function: streaming chat responses
-├── .env
-├── package.json
-├── tailwind.config.ts
-├── vite.config.ts
-└── README.md
+bot.py (main entry point)
+├── handlers.py      # Telegram command & message handlers
+├── youtube.py       # YouTube transcript fetching via yt-dlp
+├── gemini.py        # Google Gemini AI integration with chunking
+├── cache.py         # In-memory LRU cache with VideoContext storage
+└── utils.py         # Utilities for validation, logging, metrics
 ```
 
----
+## Tech Stack
 
-## 🚀 Getting Started
+- **Python 3.12** with asyncio for concurrent processing
+- **python-telegram-bot v20.7** for Telegram Bot API integration
+- **yt-dlp 2024.12.13** for robust YouTube subtitle extraction
+- **google-generativeai 0.8.3** official SDK for Gemma 3 27B
+- **In-memory LRU caching** with TTL for video context storage
+- **Prometheus metrics** for monitoring and observability
+- **Docker** deployment with health checks and resource limits
+
+## Quick Start
 
 ### Prerequisites
 
-- **Node.js** v18+ — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-- **npm** or **bun** package manager
-- A **Supabase** account — [supabase.com](https://supabase.com)
+1. **Telegram Bot Token**: Get from [@BotFather](https://t.me/botfather)
+2. **Google Gemini API Key**: Get from [Google AI Studio](https://aistudio.google.com/app/apikey)
 
-### Installation
+### Local Development
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone <repository-url>
+   cd youtube-content-summarizer
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Set environment variables**:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+4. **Run the bot**:
+   ```bash
+   python bot.py
+   ```
+
+### Docker Deployment
+
+1. **Clone and configure**:
+
+   ```bash
+   git clone <repository-url>
+   cd youtube-content-summarizer
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+2. **Deploy with Docker Compose**:
+
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Check status**:
+   ```bash
+   docker-compose ps
+   docker-compose logs -f
+   ```
+
+## Usage
+
+### Basic Commands
+
+- `/start` - Welcome message and introduction
+- `/help` - Detailed help and usage instructions
+- `/summarize <YouTube URL>` - Generate video summary
+- `/stats` - Show bot statistics and cache status
+
+### Example Usage
+
+1. **Summarize a video**:
+
+   ```
+   /summarize https://www.youtube.com/watch?v=dQw4w9WgXcQ
+   ```
+
+2. **Ask follow-up questions**:
+   After receiving a summary, reply to the bot's message with your question:
+   ```
+   What are the main points discussed about machine learning?
+   ```
+
+### Supported URL Formats
+
+- `https://www.youtube.com/watch?v=VIDEO_ID`
+- `https://youtu.be/VIDEO_ID`
+- `https://m.youtube.com/watch?v=VIDEO_ID`
+
+## Configuration
+
+### Environment Variables
+
+| Variable         | Description                        | Required |
+| ---------------- | ---------------------------------- | -------- |
+| `BOT_TOKEN`      | Telegram bot token from @BotFather | Yes      |
+| `GEMINI_API_KEY` | Google Gemini API key              | Yes      |
+
+### Limits and Constraints
+
+- **Video Length**: Maximum 3 hours
+- **URL Security**: Only HTTPS YouTube URLs accepted
+- **Transcript Requirement**: Videos must have captions/subtitles
+- **Cache TTL**: 2 hours for video context storage
+- **Concurrent Requests**: 5 simultaneous Gemini API calls
+- **Cache Limits**: 1000 chats max, 25 videos per chat
+
+## Monitoring
+
+### Health Checks
+
+- **Health endpoint**: `http://localhost:8080/health`
+- **Ping endpoint**: `http://localhost:8080/ping`
+
+### Metrics (Prometheus)
+
+Available at `http://localhost:8000`:
+
+- `telegram_bot_requests_total` - Request counter by command and status
+- `telegram_bot_processing_seconds` - Processing time histogram by operation
+- `gemini_tokens_total` - Token usage counter by type (input/output)
+
+### Logs
+
+JSON-structured logs with the following information:
+
+- Timestamp and log level
+- Module and operation context
+- Processing metrics and errors
+- Cache statistics
+
+## Error Handling
+
+The bot handles various error scenarios gracefully:
+
+- **Invalid URLs**: Clear error messages with format examples
+- **Missing Transcripts**: Informative messages about caption availability
+- **Rate Limits**: Exponential backoff with user notifications
+- **Content Safety**: Gemini safety filter integration
+- **Timeouts**: Graceful timeout handling with retry logic
+- **YouTube Blocking**: Uses yt-dlp with proper headers to bypass bot detection
+
+## Performance
+
+### Processing Pipeline
+
+1. **URL Validation** (< 1ms)
+2. **Video Info Extraction** (1-3 seconds) - Uses yt-dlp for metadata
+3. **Transcript Fetch** (2-5 seconds) - Subtitle extraction with timing
+4. **Text Cleaning** (< 100ms)
+5. **AI Summarization** (5-15 seconds) - Gemma 3 27B
+6. **Video Context Caching** (< 10ms) - Comprehensive metadata storage
+
+### Optimization Features
+
+- **Async I/O**: Non-blocking operations throughout
+- **Semaphore Limits**: Prevents API rate limit violations (5 concurrent)
+- **LRU Caching**: Efficient memory usage with TTL and video context storage
+- **Chunking**: Handles large transcripts via map-reduce (25k token chunks)
+- **Connection Pooling**: Reused HTTP connections
+- **Smart Retry Logic**: Exponential backoff for rate limits and timeouts
+
+## Development
+
+### Project Structure
+
+```
+youtube-content-summarizer/
+├── bot.py                 # Main application entry point
+├── handlers.py            # Telegram bot handlers
+├── youtube.py             # YouTube transcript processing
+├── gemini.py              # Google Gemini AI integration
+├── cache.py               # In-memory caching system
+├── utils.py               # Utility functions
+├── requirements.txt       # Python dependencies
+├── Dockerfile            # Container configuration
+├── docker-compose.yml    # Deployment configuration
+├── env.example           # Environment template
+└── README.md             # This file
+```
+
+### Key Components
+
+- **VideoContext Storage**: Comprehensive video metadata with transcript data
+- **yt-dlp Integration**: Robust YouTube data extraction bypassing restrictions
+- **Gemma 3 27B**: Latest model with improved performance
+- **Multi-level Caching**: Per-chat LRU caches with global chat management
+- **Context-aware Q&A**: Uses video metadata for better question answering
+- **Production Monitoring**: Health checks, metrics, and structured logging
+
+### Dependencies
+
+```
+python-telegram-bot[all]==20.7
+yt-dlp==2024.12.13
+google-generativeai==0.8.3
+aiohttp==3.9.1
+tenacity==8.2.3
+prometheus-client==0.19.0
+python-dotenv==1.0.0
+```
+
+### Testing
+
+Run basic functionality tests:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/kumarswamy603digital/vidsense.git
+# Test URL validation
+python -c "from utils import extract_video_id; print(extract_video_id('https://youtu.be/dQw4w9WgXcQ'))"
 
-# 2. Navigate to the project directory
-cd vidsense
-
-# 3. Install dependencies
-npm install
-
-# 4. Set up environment variables
-cp .env.example .env
-# Open .env and fill in your Supabase credentials (see below)
-
-# 5. Start the development server
-npm run dev
+# Test transcript cleaning
+python -c "from utils import clean_transcript_text; print(clean_transcript_text('[Music] Hello world [Applause]'))"
 ```
 
-The app will be available at **http://localhost:5173**
+## Deployment
 
----
+### Production Considerations
 
-## 🔐 Environment Variables
+1. **Resource Limits**: Set appropriate memory/CPU limits
+2. **Monitoring**: Deploy with metrics collection
+3. **Logging**: Centralized log aggregation
+4. **Health Checks**: Load balancer integration
+5. **Secrets Management**: Secure API key storage
 
-Create a `.env` file in the root directory with the following:
+### Scaling
 
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_public_key
+The bot is designed for single-instance deployment with:
+
+- In-memory caching (no external dependencies)
+- Concurrent request handling via semaphores
+- Graceful degradation under high load
+
+For higher scale requirements, consider:
+
+- Multiple bot instances with load balancing
+- External caching (Redis) for shared state
+- Database storage for persistent analytics
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Transcript unavailable"**: Video doesn't have captions or subtitles
+2. **"Rate limit exceeded"**: Temporary API limits, retry automatically with backoff
+3. **"Video too long"**: Videos over 3 hours aren't supported
+4. **"Invalid URL"**: Only HTTPS YouTube URLs accepted
+5. **"Video is private or unavailable"**: Video requires special access or is deleted
+6. **"Processing timeout"**: Large videos may take longer, automatic retry logic applies
+
+### Debug Information
+
+Check logs for detailed error information:
+
+```bash
+docker-compose logs -f youtube-summarizer-bot
 ```
 
-| Variable | Description |
-|---|---|
-| `VITE_SUPABASE_URL` | Your Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Your Supabase anon/public key |
+Monitor metrics:
 
-> ⚠️ Never commit your `.env` file. It is already listed in `.gitignore`.
-
----
-
-## 🔧 API Reference
-
-### `POST /functions/v1/summarize`
-
-Extracts a transcript from a YouTube video and returns an AI-generated structured summary.
-
-**Request Body:**
-```json
-{
-  "url": "https://www.youtube.com/watch?v=VIDEO_ID",
-  "language": "en"
-}
+```bash
+curl http://localhost:8080/health
+curl http://localhost:8000/metrics
 ```
 
-| Field | Type | Options |
-|---|---|---|
-| `url` | `string` | Any valid YouTube URL |
-| `language` | `string` | `"en"`, `"hi"`, `"kn"` |
+## Support
 
-**Response:**
-```json
-{
-  "videoId": "VIDEO_ID",
-  "transcript": "Full transcript text...",
-  "summary": "Structured AI summary..."
-}
-```
+For issues and questions:
 
----
-
-### `POST /functions/v1/chat`
-
-Answers questions grounded in the video transcript, with support for slash commands and streaming responses.
-
-**Request Body:**
-```json
-{
-  "question": "What is the main argument of the video?",
-  "transcript": "Full transcript text...",
-  "history": [],
-  "language": "en"
-}
-```
-
-**Response:** Streaming SSE (Server-Sent Events)
-
-**Supported Slash Commands:**
-
-| Command | Description |
-|---|---|
-| `/summary` | Quick overview of the video |
-| `/deepdive` | In-depth analysis of key topics |
-| `/actionpoints` | Actionable takeaways from the video |
-
----
-
-## 🎨 UI & Design
-
-- **Dark theme** with gradient accents and backdrop blur effects
-- **Skeleton loaders** for smooth loading states
-- **Toast notifications** for errors and status updates
-- **Responsive layout** — optimized for both mobile and desktop
-
----
-
-## 🛡️ Error Handling
-
-| Scenario | Behaviour |
-|---|---|
-| Invalid YouTube URL | Friendly validation error message |
-| No transcript available | Clear notification with suggestion |
-| Rate limiting `429` | Informative toast message |
-| AI credits exhausted `402` | User-friendly notification |
-| Network errors | Retry option with toast |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. **Fork** the repository
-2. **Create** your feature branch
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit** your changes
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. **Push** to the branch
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
----
-
-## 📄 License
-
-This project is open-source. See the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgements
-
-- [Google Gemini](https://deepmind.google/technologies/gemini/) — AI model powering summaries and chat
-- [Supabase](https://supabase.com) — Backend and Edge Functions platform
-- [shadcn/ui](https://ui.shadcn.com/) — UI component library
-
----
-
-<p align="center">Built with ❤️ by <a href="https://github.com/kumarswamy603digital">kumarswamy603digital</a></p>
+1. Check the troubleshooting section
+2. Review logs for error details
+3. Ensure API keys are valid and have sufficient quota
